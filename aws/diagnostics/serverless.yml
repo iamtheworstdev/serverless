@@ -1,0 +1,42 @@
+service:
+  name: diagnostics
+
+plugins:
+  - serverless-domain-manager
+  - serverless-webpack
+
+provider:
+  name: aws
+  endpointType: REGIONAL
+  memorySize: 128
+  region: us-east-1
+  runtime: nodejs10.x
+  stage: dev
+  exclude:
+    - node_modules/**
+
+custom:
+  customDomain:
+    basePath: "diagnostics"
+    domainName: ${self:custom.domains.${self:custom.stage}}
+    createRoute53Record: false
+    endpointType: REGIONAL
+    stage: ${self:custom.stage}
+  deploymentStage: ${opt:stage, ${self:provider.stage}}
+  domains:
+    prod: api.example.com
+    test: api.test.example.com
+    dev: api.dev.example.com
+  region: ${opt:region, ${self:provider.region}}
+  stage: ${opt:stage, ${self:provider.stage}}
+  subdomains:
+    us-east-1: east
+    us-west-2: west
+
+functions:
+  region:
+    handler: handler.region
+    events:
+      - http:
+          method: get
+          path: region
